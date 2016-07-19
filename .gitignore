@@ -6,3 +6,7 @@
 .DS_Store
 /build
 /captures
+/gradlew
+src/androidTest/
+src/test/
+/gradlew.bat
