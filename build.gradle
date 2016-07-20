@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.novoda.bintray-release'
 
 buildscript {
     repositories {
@@ -6,6 +7,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:2.1.2'
+        classpath 'com.novoda:bintray-release:0.3.4'
     }
 }
 
@@ -38,6 +40,15 @@ android {
     lintOptions {
         abortOnError false
     }
+}
+
+publish {
+    groupId = 'com.github.hemimotors'
+    artifactId = 'apiworker'
+    publishVersion = '0.0.3'
+    desc = 'A small library for http requests.'
+    licences = ['MIT']
+    website = 'https://github.com/hemimotors/ApiWorker'
 }
 
 dependencies {

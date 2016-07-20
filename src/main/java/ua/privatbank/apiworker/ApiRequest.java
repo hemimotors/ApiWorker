@@ -37,27 +37,57 @@ public abstract class ApiRequest {
         return this;
     }
 
+    public ApiRequest addToJsonParams(String key, Object value) {
+        try {
+            jsonParams.putOpt(key, value);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return this;
+    }
+
+    public ApiRequest addToJsonStoreParams(String key, Object value) {
+        try {
+            jsonStoreParams.putOpt(key, value);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return this;
+    }
+
+    public JSONObject getJsonParams() {
+        return jsonParams;
+    }
+
+    public JSONObject getJsonStoreParams() {
+        return jsonStoreParams;
+    }
+
     @Override
     public String toString() {
-        if (!params.isEmpty()) {
-            try {
-                for (Map.Entry<String, String> entry : params.entrySet()) {
-                    jsonParams.put(entry.getKey(), entry.getValue());
-                }
-                jsonBody.put("params", jsonParams);
-            } catch (JSONException e) {
-                e.printStackTrace();
+        try {
+            for (Map.Entry<String, String> entry : params.entrySet()) {
+                jsonParams.put(entry.getKey(), entry.getValue());
             }
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
-        if (!storeParams.isEmpty()) {
-            try {
-                for (Map.Entry<String, String> entry : storeParams.entrySet()) {
-                    jsonStoreParams.put(entry.getKey(), entry.getValue());
-                }
-                jsonBody.put("store_params", jsonStoreParams);
-            } catch (JSONException e) {
-                e.printStackTrace();
+        try {
+            for (Map.Entry<String, String> entry : storeParams.entrySet()) {
+                jsonStoreParams.put(entry.getKey(), entry.getValue());
             }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        try {
+            jsonBody.put("params", jsonParams);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        try {
+            jsonBody.put("store_params", jsonStoreParams);
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
         return jsonBody.toString();
     }

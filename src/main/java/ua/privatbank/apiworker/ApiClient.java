@@ -37,11 +37,11 @@ public abstract class ApiClient {
 
     public abstract void onResponse(ApiResponse response);
 
-    public <T extends ApiResponse> void get(String url, Class<T> clazz, Callback<T> callback) {
+    protected <T extends ApiResponse> void get(String url, Class<T> clazz, Callback<T> callback) {
         get(defaultClient, url, clazz, callback);
     }
 
-    public <T extends ApiResponse> void get(OkHttpClient client, String url, Class<T> clazz, Callback<T> callback) {
+    protected <T extends ApiResponse> void get(OkHttpClient client, String url, Class<T> clazz, Callback<T> callback) {
         if (isOnline()) {
             Request request = new Request.Builder().url(url).get().build();
             client.newCall(request).enqueue(new CallbackWrapper<>(clazz, callback));
@@ -51,11 +51,11 @@ public abstract class ApiClient {
         }
     }
 
-    public <T extends ApiResponse> T get(String url, Class<T> clazz) {
+    protected <T extends ApiResponse> T get(String url, Class<T> clazz) {
         return get(defaultClient, url, clazz);
     }
 
-    public <T extends ApiResponse> T get(OkHttpClient client, String url, Class<T> clazz) {
+    protected <T extends ApiResponse> T get(OkHttpClient client, String url, Class<T> clazz) {
         ApiHandler<T> apiHandler = new ApiHandler<>(clazz);
         if (isOnline()) {
             Request request = new Request.Builder().url(url).get().build();
@@ -70,11 +70,11 @@ public abstract class ApiClient {
         }
     }
 
-    public <T extends ApiResponse> void post(String url, ApiRequest apiRequest, Class<T> clazz, Callback<T> callback) {
+    protected <T extends ApiResponse> void post(String url, ApiRequest apiRequest, Class<T> clazz, Callback<T> callback) {
         post(defaultClient, url, apiRequest, clazz, callback);
     }
 
-    public <T extends ApiResponse> void post(OkHttpClient client, String url, ApiRequest apiRequest, Class<T> clazz, Callback<T> callback) {
+    protected <T extends ApiResponse> void post(OkHttpClient client, String url, ApiRequest apiRequest, Class<T> clazz, Callback<T> callback) {
         if (isOnline()) {
             RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), apiRequest.toString());
             Request request = new Request.Builder().url(url).post(requestBody).build();
@@ -85,11 +85,11 @@ public abstract class ApiClient {
         }
     }
 
-    public <T extends ApiResponse> T post(String url, ApiRequest apiRequest, Class<T> clazz) {
+    protected <T extends ApiResponse> T post(String url, ApiRequest apiRequest, Class<T> clazz) {
         return post(defaultClient, url, apiRequest, clazz);
     }
 
-    public <T extends ApiResponse> T post(OkHttpClient client, String url, ApiRequest apiRequest, Class<T> clazz) {
+    protected <T extends ApiResponse> T post(OkHttpClient client, String url, ApiRequest apiRequest, Class<T> clazz) {
         ApiHandler<T> apiHandler = new ApiHandler<>(clazz);
         if (isOnline()) {
             RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), apiRequest.toString());
@@ -105,11 +105,11 @@ public abstract class ApiClient {
         }
     }
 
-    public void setConnectionErrorText(String connectionErrorText) {
+    protected void setConnectionErrorText(String connectionErrorText) {
         this.connectionErrorText = connectionErrorText;
     }
 
-    public void setEmptyBodyErrorText(String emptyBodyErrorText) {
+    protected void setEmptyBodyErrorText(String emptyBodyErrorText) {
         this.emptyBodyErrorText = emptyBodyErrorText;
     }
 
@@ -168,7 +168,11 @@ public abstract class ApiClient {
                 return errorResponse;
             } else {
                 T typedResponse = new Gson().fromJson(response.body().charStream(), clazz);
-                if (typedResponse.getError() != null) {
+                if (typedResponse == null) {
+                    T errorResponse = createErrorResponse(ApiError.ERROR_CODE_NO_BODY, emptyBodyErrorText);
+                    onResponse(errorResponse);
+                    return errorResponse;
+                } else if (typedResponse.getError() != null) {
                     onResponse(typedResponse);
                 } else {
                     typedResponse.setSuccess(true);
