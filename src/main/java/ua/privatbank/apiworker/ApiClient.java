@@ -167,18 +167,24 @@ public abstract class ApiClient {
                 onResponse(errorResponse);
                 return errorResponse;
             } else {
-                T typedResponse = new Gson().fromJson(response.body().charStream(), clazz);
-                if (typedResponse == null) {
+                try {
+                    T typedResponse = new Gson().fromJson(response.body().charStream(), clazz);
+                    if (typedResponse == null) {
+                        T errorResponse = createErrorResponse(ApiError.ERROR_CODE_NO_BODY, emptyBodyErrorText);
+                        onResponse(errorResponse);
+                        return errorResponse;
+                    } else if (typedResponse.getError() != null) {
+                        onResponse(typedResponse);
+                    } else {
+                        typedResponse.setSuccess(true);
+                        onResponse(typedResponse);
+                    }
+                    return typedResponse;
+                } catch (Exception e) {
                     T errorResponse = createErrorResponse(ApiError.ERROR_CODE_NO_BODY, emptyBodyErrorText);
                     onResponse(errorResponse);
                     return errorResponse;
-                } else if (typedResponse.getError() != null) {
-                    onResponse(typedResponse);
-                } else {
-                    typedResponse.setSuccess(true);
-                    onResponse(typedResponse);
                 }
-                return typedResponse;
             }
         }
     }
